@@ -1,0 +1,102 @@
+
+#include "driver/i2c.h"
+#include "sgtl5000.h"
+/* Write operation:
+
+• Start condition 
+• Device address with the R/W bit cleared to indicate write 
+• Send two bytes for the 16 bit register address (most significant byte first)
+• Send two bytes for the 16 bits of data to be written to the register (most significant byte first)
+• Stop condition
+*/
+
+esp_err_t audiobit_write_reg (i2c_port_t i2c_num, uint16_t reg_addr, uint16_t reg_val)
+{
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+
+    // Start condition
+    i2c_master_start(cmd);
+    // Address + Write bit
+    i2c_master_write_byte(cmd, (AUDIOBIT_I2C_ADDR<<1)|WRITE_BIT, ACK_CHECK_EN);
+    // MSB for reg address
+    i2c_master_write_byte(cmd, (reg_addr>>8)&0xFF, ACK_CHECK_EN);
+    // LSB for reg address
+    i2c_master_write_byte(cmd, (reg_addr&0xFF), ACK_CHECK_EN);
+    // MSB for reg data
+    i2c_master_write_byte(cmd, (reg_val>>8)&0xFF, ACK_CHECK_EN);
+    // LSB for reg data
+    i2c_master_write_byte(cmd, (reg_val&0xFF), ACK_CHECK_EN);
+    i2c_master_stop(cmd);
+
+    // Execute and return status
+    esp_err_t ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    return ret;
+}
+
+
+/* Read operation:
+
+• Start condition
+• Device address with the R/W bit cleared to indicate write 
+• Send two bytes for the 16 bit register address (most significant byte first)
+• Stop Condition followed by start condition (or a single restart condition)
+• Device address with the R/W bit set to indicate read 
+• Read two bytes from the addressed register (most significant byte first)
+• Stop condition
+*/
+
+esp_err_t audiobit_read_reg (i2c_port_t i2c_num, uint16_t reg_addr, uint16_t *reg_val)
+{
+    uint8_t byte_val;
+    uint16_t val;   // Value read from register
+
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+
+    // Start condition
+    i2c_master_start(cmd);
+    // Address + Write bit
+    i2c_master_write_byte(cmd, (AUDIOBIT_I2C_ADDR<<1)|WRITE_BIT, ACK_CHECK_EN);
+    // MSB for reg address
+    i2c_master_write_byte(cmd, (reg_addr>>8)&0xFF, ACK_CHECK_EN);
+    // LSB for reg address
+    i2c_master_write_byte(cmd, (reg_addr&0xFF), ACK_CHECK_EN);
+
+    // Restart (stop + start)
+    i2c_master_stop(cmd);
+    i2c_master_start(cmd);
+
+    // Address + read
+    i2c_master_write_byte(cmd, (AUDIOBIT_I2C_ADDR<<1)|READ_BIT, ACK_CHECK_EN);
+    // MSB for reg data
+    i2c_master_read_byte(cmd, &byte_val, ACK_VAL);
+    val = byte_val << 8;
+    // LSB for reg data
+    i2c_master_read_byte(cmd, &byte_val, NACK_VAL);
+    val |= byte_val;
+
+    i2c_master_stop(cmd);
+
+    // Execute and return status
+    esp_err_t ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    return ret;
+}
+
+
+/**
+ * @brief i2c master initialization
+ */
+void audiobit_i2c_init()
+{
+    int i2c_master_port = AUDIOBIT_I2C_NUM;
+    i2c_config_t conf;
+    conf.mode = I2C_MODE_MASTER;
+    conf.sda_io_num = AUDIOBIT_I2C_SDA_IO;
+    conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.scl_io_num = AUDIOBIT_I2C_SCL_IO;
+    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.master.clk_speed = AUDIOBIT_I2C_FREQ_HZ;
+    i2c_param_config(i2c_master_port, &conf);
+    i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+}
