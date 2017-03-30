@@ -36,6 +36,11 @@ extern "C" {
 #include "soc/soc.h"
 #include "sgtl5000.h"
 
+#define AUDIOBIT_VDDD			1800
+#define AUDIOBIT_EXT_VDDD		1
+#define AUDIOBIT_VDDIO			3300
+#define AUDIOBIT_VDDA			1800
+
 #define AUDIOBIT_I2C_SCL_IO		19    /*!< gpio number for I2C master clock */
 #define AUDIOBIT_I2C_SDA_IO		18    /*!< gpio number for I2C master data  */
 #define AUDIOBIT_I2C_NUM 		1   /*!< I2C port number for master dev */

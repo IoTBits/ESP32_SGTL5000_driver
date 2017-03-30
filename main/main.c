@@ -31,7 +31,7 @@ software.
  *    GPIO19 is assigned as the clock signal of i2c master port
  * - no need to add external pull-up resistors, driver will enable internal pull-up resistors.
  */
-
+/*
 esp_err_t scanaddress (i2c_port_t i2c_num, uint8_t num)
 {
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -48,7 +48,7 @@ esp_err_t scanaddress (i2c_port_t i2c_num, uint8_t num)
     i2c_cmd_link_delete(cmd);
     return ret;
 }
-
+*/
 void init_test_sgtl5000 (void)
 {
     uint8_t retval=0;
