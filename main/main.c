@@ -120,8 +120,8 @@ void app_main()
     //delay_us(50000);
     audiobit_i2c_init ();
     init_test_sgtl5000 ();
-
-    while (1)
-        audiobit_play();
+    printf("test main!\n");
+    //while (1)
+       // audiobit_play();
     //xTaskCreate(i2c_test_task, "i2c_test_task_1", 1024 * 2, (void* ) 1, 10, NULL);
 }

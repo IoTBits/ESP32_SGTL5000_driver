@@ -3,7 +3,9 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := i2c
+PROJECT_NAME := AudioBit_driver
+
+COMPONENT_ADD_INCLUDEDIRS := components/include
 
 include $(IDF_PATH)/make/project.mk
 
