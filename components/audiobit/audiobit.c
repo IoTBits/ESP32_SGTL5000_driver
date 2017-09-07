@@ -24,7 +24,6 @@ software.
 #include <string.h>
 #include "sgtl5000.h"
 #include "audiobit.h"
-#include "sounds.h"
 #include "soc/rtc.h"
 #include "soc/soc.h"
 
@@ -45,26 +44,6 @@ static i2s_pin_config_t audiobit_pin_config = {
     .data_out_num = AUDIOBIT_DOUT,
     .data_in_num = AUDIOBIT_DIN                                                       //Not used
 };
-
-
-void audiobit_play (void)
-{
-    const char *ptr = (const char *)audiobit_music;
-    unsigned int offset = 0;
-    signed short samples[256], i;
-
-    while (offset<NUM_ELEMENTS*2)
-    {
-        memcpy (samples, ptr+offset, sizeof(samples));
-
-        for (i=0; i<256; i++)
-            samples[i] = samples[i] + 32768;
-        i2s_write_bytes (I2S_NUM, (const char*) samples, 512, portMAX_DELAY);
-        offset = offset+512;
-    }
-    //i2s_write_bytes (I2S_NUM, (const char*)audiobit_music, 256, portMAX_DELAY);
-}
-//int i2s_write_bytes(i2s_port_t i2s_num, const char *src, size_t size, TickType_t ticks_to_wait);
 
 
 // ##################################################################
@@ -327,9 +306,7 @@ esp_err_t audiobit_pin_drive_strength (uint8_t i2c_strength, uint8_t i2s_strengt
 • Stop condition
 */
 
-
-
-esp_err_t audiobit_poweron_init (void)
+esp_err_t audiobit_playback_init (void)
 {
     uint8_t retval=0;
     uint16_t readval;
@@ -443,8 +420,7 @@ esp_err_t audiobit_write_reg (i2c_port_t i2c_num, uint16_t reg_addr, uint16_t re
 */
 esp_err_t audiobit_read_reg (i2c_port_t i2c_num, uint16_t reg_addr, uint16_t *reg_val)
 {
-    uint8_t *byte_val = reg_val;
-    //uint16_t val;   // Value read from register
+    uint8_t *byte_val = reg_val;		// This will cause warning, please ignore
     esp_err_t ret;
 
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -495,28 +471,8 @@ void audiobit_i2c_init()
 
 void audiobit_i2s_init ()
 {
-    uint32_t reg_val;
-
-    i2s_config_t i2s_config = {
-        .mode = I2S_MODE_MASTER | I2S_MODE_TX,                                  // Only TX
-        .sample_rate = AUDIOBIT_SAMPLERATE,
-        .bits_per_sample = AUDIOBIT_BITSPERSAMPLE,                                                  //16-bit per channel
-        .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,                           //2-channels
-        .communication_format = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB,
-        .dma_buf_count = 6,
-        .dma_buf_len = 512,                                                      //
-        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1                                //Interrupt level 1
-    };
-
-    i2s_pin_config_t pin_config = {
-        .bck_io_num = AUDIOBIT_BCK,
-        .ws_io_num = AUDIOBIT_LRCLK,
-        .data_out_num = AUDIOBIT_DOUT,
-        .data_in_num = AUDIOBIT_DIN                                                       //Not used
-    };
-
-    i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
-    i2s_set_pin(I2S_NUM, &pin_config);
+    i2s_driver_install(I2S_NUM, &audiobit_i2s_config, 0, NULL);
+    i2s_set_pin(I2S_NUM, &audiobit_pin_config);
 
     // Enable MCLK output
     WRITE_PERI_REG(PIN_CTRL, READ_PERI_REG(PIN_CTRL)&0xFFFFFFF0);

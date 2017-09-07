@@ -36,25 +36,33 @@ extern "C" {
 #include "soc/soc.h"
 #include "sgtl5000.h"
 
+// ################ AudioBit-specific settings ################
+// Power rails in millivolts
 #define AUDIOBIT_VDDD			1800
 #define AUDIOBIT_EXT_VDDD		1
 #define AUDIOBIT_VDDIO			3300
 #define AUDIOBIT_VDDA			1800
 
-#define AUDIOBIT_I2C_SCL_IO		19    /*!< gpio number for I2C master clock */
-#define AUDIOBIT_I2C_SDA_IO		18    /*!< gpio number for I2C master data  */
-#define AUDIOBIT_I2C_NUM 		1   /*!< I2C port number for master dev */
-#define AUDIOBIT_I2C_FREQ_HZ    100000     /*!< I2C master clock frequency */
-#define AUDIOBIT_I2C_ADDR  		0x0A    /*!< slave address for AudioBit */
+// GPIO pads for the control bus (I2C)
+#define AUDIOBIT_I2C_SCL_IO		19
+#define AUDIOBIT_I2C_SDA_IO		18
+#define AUDIOBIT_I2C_ADDR  		0x0A		// AudioBit slave address
 
-// NOTE: Do not change I2S num right now because it will affect MCLK output!
-#define I2S_NUM         		(0)
-// MCLK still implemented in direct routine, don't change it!
-#define AUDIOBIT_MCLK			0
+// GPIO pads for the I2S connections
+#define AUDIOBIT_MCLK			0			// NOTE: Do not change MCLK pad
 #define	AUDIOBIT_LRCLK			25
 #define AUDIOBIT_BCK			26
 #define AUDIOBIT_DOUT			22
-#define AUDIOBIT_DIN			-1
+#define AUDIOBIT_DIN			-1			// Audio recording not supported yet!
+
+
+// ################ System settings (better not touch) ################
+// Control I2C peripheral settings
+#define AUDIOBIT_I2C_NUM 		1			// I2C module number
+#define AUDIOBIT_I2C_FREQ_HZ    100000		// Master clock frequency (Hz)
+
+// NOTE: Do not change I2S num right now because it will affect MCLK output!
+#define I2S_NUM         		(0)
 #define AUDIOBIT_SAMPLERATE		48000
 #define AUDIOBIT_BITSPERSAMPLE	16
 
@@ -68,13 +76,13 @@ extern "C" {
 #define I2C_MASTER_TX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
 
-
-esp_err_t audiobit_poweron_init (void);
+// General system related APIs
+//esp_err_t audiobit_poweron_init (void);
 esp_err_t audiobit_write_reg (i2c_port_t i2c_num, uint16_t reg_addr, uint16_t reg_val);
 esp_err_t audiobit_read_reg (i2c_port_t i2c_num, uint16_t reg_addr, uint16_t *reg_val);
 void audiobit_i2c_init();
 void audiobit_i2s_init();
-void audiobit_play (void);
+esp_err_t audiobit_playback_init (void);
 
 // AudioBit APIs for SGTL5000 config
 esp_err_t audiobit_set_surround_sound (uint8_t surround);
