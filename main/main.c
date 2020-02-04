@@ -25,12 +25,14 @@ software.
 #include <string.h>
 #include "audiobit.h"
 #include "sounds.h"
+#include "driver/i2s.h"
 
 void audio_play_task (void *pvParameter)
 {
     const char *ptr = (const char *)audiobit_music;
     unsigned int offset = 0;
     signed short samples[256], i;
+    size_t written;
 
     // Play array from signed, 16-bit stereo file
     while (offset<NUM_ELEMENTS*2)
@@ -39,7 +41,7 @@ void audio_play_task (void *pvParameter)
 
         for (i=0; i<256; i++)
             samples[i] = samples[i] + 32768;
-        i2s_write_bytes (I2S_NUM, (const char*) samples, 512, portMAX_DELAY);
+        i2s_write (I2S_NUM, (const char*) samples, 512, &written, portMAX_DELAY);
         offset = offset+512;
     }
 
@@ -50,7 +52,7 @@ void audio_play_task (void *pvParameter)
     {
         for (i=0; i<256; i++)
             samples[i] = 0;
-        i2s_write_bytes (I2S_NUM, (const char*) samples, 512, portMAX_DELAY);
+        i2s_write (I2S_NUM, (const char*) samples, 512, &written, portMAX_DELAY);
     }
 }
 

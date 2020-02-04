@@ -44,15 +44,15 @@ extern "C" {
 #define AUDIOBIT_VDDA			1800
 
 // GPIO pads for the control bus (I2C)
-#define AUDIOBIT_I2C_SCL_IO		19
+#define AUDIOBIT_I2C_SCL_IO		5
 #define AUDIOBIT_I2C_SDA_IO		18
 #define AUDIOBIT_I2C_ADDR  		0x0A		// AudioBit slave address
 
 // GPIO pads for the I2S connections
 #define AUDIOBIT_MCLK			0			// NOTE: Do not change MCLK pad
-#define	AUDIOBIT_LRCLK			25
-#define AUDIOBIT_BCK			26
-#define AUDIOBIT_DOUT			22
+#define	AUDIOBIT_LRCLK			21
+#define AUDIOBIT_BCK			22
+#define AUDIOBIT_DOUT			23
 #define AUDIOBIT_DIN			-1			// Audio recording not supported yet!
 
 

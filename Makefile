@@ -3,9 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := AudioBit_driver
-
-COMPONENT_ADD_INCLUDEDIRS := components/include
+PROJECT_NAME := blink
 
 include $(IDF_PATH)/make/project.mk
 
